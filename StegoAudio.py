@@ -18,14 +18,34 @@ def audioStegoProcess():
 
     frames = fileObj.readframes(fileObj.getnframes())
     sample = struct.unpack("<"+"h"*(len(frames)//2), frames)
-    print(len(sample))
+    samples = list(sample)
 
     with open(".binaryMessage.txt", 'r') as file:
         data = str(file.read().strip())
-    print(data[0])
+
+    for i in range(len(data)):
+        bit = int(data[i])
+
+        # clear LSB
+        samples[i] = samples[i] & ~1
+
+        # set new bit
+        samples[i] = samples[i] | bit
+
+    modifyFrames = struct.pack("<" + "h"*len(samples), *samples)
+    newFile = wave.open("stego.wav", "wb")
+
+    newFile.setnchannels(channel)
+    newFile.setsampwidth(sampleWidth)
+    newFile.setframerate(sampleRate)
+
+    newFile.writeframes(modifyFrames)
+
+    newFile.close()
 
     for i in range(0, len(sample)):
-        new_sample = str(format(sample[i], '08b'))
+        newSample = str(format(sample[i], '08b'))
+        
 
 
 
@@ -43,21 +63,23 @@ def encode():
         with open(f"{os.getcwd()}/.binaryMessage.txt", 'a') as file:
             file.write(format(ascii_value, '08b'))
     
+    audioStegoProcess()
+    
 
 def decode():
     """THE DECODING LOGIC WILL BE HERE"""
 
 
 if __name__ == "__main__":
-    audioStegoProcess()
-    # print("Steganography Tool:")
-    # print("1. Encode")
-    # print("2. Decode")
-    # choice = int(input("Answer: "))
-    # if choice == 1:
-    #     selected_audio_path = "/home/dhyey/Codes/Projects/Steganography with Audio/audio.wav"
-    #     encode()
-    # elif choice == 2:
-    #     decode()
-    # else:
-    #     print("Invalid choice")
+    # audioStegoProcess()
+    print("Steganography Tool:")
+    print("1. Encode")
+    print("2. Decode")
+    choice = int(input("Answer: "))
+    if choice == 1:
+        selected_audio_path = "/home/dhyey/Codes/Projects/Steganography with Audio/audio.wav"
+        encode()
+    elif choice == 2:
+        decode()
+    else:
+        print("Invalid choice")
