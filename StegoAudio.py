@@ -5,8 +5,10 @@ import getpass
 import os
 from threading import Thread
 
+folderPath = "/home/dhyey/Codes/Projects/Steganography with Audio/"
+os.chdir(folderPath)
 
-audioFile = "/home/dhyey/Codes/Projects/Steganography with Audio/audio.wav"
+audioFile = "audio.wav"
 fileObj = wave.open(audioFile, mode='rb')
 
 channel = fileObj.getnchannels()
