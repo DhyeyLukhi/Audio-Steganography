@@ -56,7 +56,6 @@ def encode():
     secret_Message = start_sequence + f"  {secret_Message}  " + end_sequence
     with open(f"{os.getcwd()}/.binaryMessage.txt", 'w') as file:
         file.write("")
-    print(secret_Message)
     os.chdir(os.getcwd())
     for length in secret_Message:
         ascii_value = ord(length)
@@ -67,8 +66,35 @@ def encode():
     
 
 def decode():
-    """THE DECODING LOGIC WILL BE HERE"""
-
+    start_sequence = "(!%&#"
+    end_sequence = "(*&()"
+    startseq_bin = ''.join(format(ord(c), '08b') for c in start_sequence)
+    endseq_bin = ''.join(format(ord(c), '08b') for c in end_sequence)
+    audioFile = "stego.wav"
+    fileObj = wave.open(audioFile, mode='rb')
+    frames = fileObj.readframes(fileObj.getnframes())
+    sample = struct.unpack("<"+"h"*(len(frames)//2), frames)
+    samples = list(sample)
+    
+    bits = []
+    for i in range(len(sample)):
+        lsb = bin(sample[i])
+        bits.append(lsb[-1])
+    
+    binary_message = ''.join(bits)
+    start_idx = binary_message.find(startseq_bin)
+    end_idx = binary_message.find(endseq_bin, start_idx + len(startseq_bin))
+    if start_idx == -1 or end_idx == -1:
+        print("No hidden message found.")
+        return
+    secret_bin = binary_message[start_idx + len(startseq_bin):end_idx]
+    decoded_message = ""
+    for i in range(0, len(secret_bin), 8):
+        byte = secret_bin[i:i+8]
+        if len(byte) == 8:
+            decoded_message += chr(int(byte, 2))
+    
+    print("Secret Message:", decoded_message)
 
 if __name__ == "__main__":
     # audioStegoProcess()
